@@ -224,7 +224,8 @@ trace_modules(Modules) ->
 start_trace(PidSpec, Flags, File) ->
   {ok, Fd} = file:open(File, [write]),
   Tracer = proc_lib:spawn(fun() -> ?MODULE:tracer_loop(Fd) end),
-  toggle_trace(PidSpec, Flags, Tracer, true).
+  toggle_trace(PidSpec, Flags, Tracer, true),
+  Tracer.
 
 stop_trace(PidSpec, Flags, Tracer) ->
   toggle_trace(PidSpec, Flags, Tracer, false),
