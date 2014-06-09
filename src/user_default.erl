@@ -253,11 +253,11 @@ tracer_loop(Fd) ->
                 [fmt_now(Now), pname(Pid), M, F, A, Ret]),
       ?MODULE:tracer_loop(Fd);
     {trace_ts, Pid, send, Msg, To, Now} ->
-      io:format(Fd, "[~s] ~p sends to ~p: ~180p~n",
-                [fmt_now(Now), pname(Pid), To, Msg]),
+      io:format(Fd, "[~s] ~p sent to ~p: ~180p~n",
+                [fmt_now(Now), pname(Pid), pname(To), Msg]),
       ?MODULE:tracer_loop(Fd);
     {trace_ts, Pid, send_to_non_existing_process, Msg, To, Now} ->
-      io:format(Fd, "[~s] ~p sends to non existing process ~p: ~180p~n",
+      io:format(Fd, "[~s] ~p sent to non existing process ~p: ~180p~n",
                 [fmt_now(Now), pname(Pid), To, Msg]),
       ?MODULE:tracer_loop(Fd);
     {trace_ts, Pid, 'receive', Msg, Now} ->
