@@ -1,2 +1,2 @@
-ebin/user_default.beam:
-	erlc -o ebin src/user_default.erl
+ebin/user_default.beam: src/user_default.erl
+	@erlc -o ebin src/user_default.erl
