@@ -213,6 +213,13 @@ pname(Pid) ->
       Pid
   end.
 
+%%% Use tracing functions from erlang shell like this:
+%% trace_modules([m1, m2, m3]).
+%% f(Pids), Pids = [whereis(reg_name_1)] ++ ptree(whereis(reg_name_2)).
+%% f(Tracer), Tracer = start_trace(Pids, [send, 'receive', call], "/tmp/trace.out").
+%% <do stuff>
+%% stop_trace(Pids, [send, 'receive', call], Tracer).
+
 %% trace all calls to all functions in specified modules
 trace_modules(Modules) ->
   Match = [{'_', [], [{return_trace}]}],
