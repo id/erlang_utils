@@ -199,6 +199,10 @@ fmt_now({_, _, Micro} = Now) ->
   lists:flatten(io_lib:format("~.4.0w-~.2.0w-~.2.0w ~.2.0w:~.2.0w:~.2.0w.~w",
                               [Y, M, D, HH, MM, SS, Micro])).
 
+initial_call(Pid) ->
+  {initial_call, Call} = process_info(Pid, initial_call),
+  Call.
+
 pname(Pid) when not is_pid(Pid) -> Pid;
 pname(Pid) ->
   case is_process_alive(Pid) of
@@ -206,8 +210,14 @@ pname(Pid) ->
       case erlang:process_info(Pid, registered_name) of
         {registered_name, Name} -> Name;
         [] ->
-          {initial_call, Call} = process_info(Pid, initial_call),
-          {Pid, Call}
+          case erlang:process_info(Pid, dictionary) of
+            {dictionary, []} -> {Pid, initial_call(Pid)};
+            {dictionary, L} ->
+              case lists:keyfind('$initial_call', 1, L) of
+                {'$initial_call', Call} -> {Pid, Call};
+                false                   -> {Pid, initial_call(Pid)}
+              end
+          end
       end;
     false ->
       Pid
