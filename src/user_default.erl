@@ -210,9 +210,11 @@ pname(Pid) ->
     true ->
       case erlang:process_info(Pid, registered_name) of
         {registered_name, Name} -> Name;
+        undefined               -> Pid;
         [] ->
           case erlang:process_info(Pid, dictionary) of
             {dictionary, []} -> {Pid, initial_call(Pid)};
+            undefined        -> {Pid, initial_call(Pid)};
             {dictionary, L} ->
               case lists:keyfind('$initial_call', 1, L) of
                 {'$initial_call', Call} -> {Pid, Call};
@@ -289,6 +291,12 @@ tracer_loop(Fd) ->
     {trace_ts, Pid, 'receive', Msg, Now} ->
       io:format(Fd, "[~s] ~p received ~180p~n",
                 [fmt_now(Now), pname(Pid), Msg]),
+      ?MODULE:tracer_loop(Fd);
+    {trace_ts, Pid, Tag, Msg, Now} when Tag =:= in_exiting;
+                                        Tag =:= out_exiting;
+                                        Tag =:= out_exited ->
+      io:format(Fd, "[~s] ~p is ~s: ~180p~n",
+                [fmt_now(Now), pname(Pid), Tag, Msg]),
       ?MODULE:tracer_loop(Fd);
     Msg ->
       exit({unexpected_msg, Msg})
