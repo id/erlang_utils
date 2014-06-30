@@ -24,6 +24,7 @@
         , start_trace/3
         , stop_trace/3
         , trace_modules/1
+        , meta_trace_modules/2
         ]).
 
 export_all(M) ->
@@ -236,6 +237,14 @@ trace_modules(Modules) ->
   lists:foreach(
     fun(M) ->
         erlang:trace_pattern({M, '_', '_'}, Match, [local])
+    end, Modules).
+
+meta_trace_modules(Tracer, Modules) ->
+  Match = [{'_', [], [{return_trace}]}],
+  lists:foreach(
+    fun(M) ->
+        {module, M} = c:l(M),
+        erlang:trace_pattern({M, '_', '_'}, Match, [{meta, Tracer}])
     end, Modules).
 
 start_trace(PidSpec, Flags, File) ->
