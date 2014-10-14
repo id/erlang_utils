@@ -21,10 +21,13 @@
         , fmt_now/1
         , pname/1
         , tracer_loop/1
-        , start_trace/3
-        , stop_trace/3
+        , toggle_trace/4
+        , tracer/1
         , trace_modules/1
         , meta_trace_modules/2
+        , meta_trace/4
+        , stop_meta_trace/1
+        , stop_meta_trace/4
         ]).
 
 export_all(M) ->
@@ -228,10 +231,11 @@ pname(Pid) ->
 
 %%% Use tracing functions from erlang shell like this:
 %% trace_modules([m1, m2, m3]).
+%% f(Tracer), Tracer = tracer("/tmp/trace.out").
 %% f(Pids), Pids = [whereis(reg_name_1)] ++ ptree(whereis(reg_name_2)).
-%% f(Tracer), Tracer = start_trace(Pids, [send, 'receive', call], "/tmp/trace.out").
+%% toggle_trace(Pids, [send, 'receive', call], Tracer, true).
 %% <do stuff>
-%% stop_trace(Pids, [send, 'receive', call], Tracer).
+%% toggle_trace(Pids, [send, 'receive', call], Tracer, false).
 
 %% trace all calls to all functions in specified modules
 trace_modules(Modules) ->
@@ -249,15 +253,19 @@ meta_trace_modules(Tracer, Modules) ->
         erlang:trace_pattern({M, '_', '_'}, Match, [{meta, Tracer}])
     end, Modules).
 
-start_trace(PidSpec, Flags, File) ->
-  {ok, Fd} = file:open(File, [write]),
-  Tracer = proc_lib:spawn(fun() -> ?MODULE:tracer_loop(Fd) end),
-  toggle_trace(PidSpec, Flags, Tracer, true),
-  Tracer.
+meta_trace(Tracer, M, F, A) ->
+  Match = [{'_', [], [{return_trace}]}],
+  erlang:trace_pattern({M, F, A}, Match, [{meta, Tracer}]).
 
-stop_trace(PidSpec, Flags, Tracer) ->
-  toggle_trace(PidSpec, Flags, Tracer, false),
-  Tracer ! stop.
+stop_meta_trace(Tracer) ->
+  stop_meta_trace(Tracer, '_', '_', '_').
+
+stop_meta_trace(Tracer, M, F, A) ->
+  erlang:trace_pattern({M, F, A}, false, [{meta, Tracer}]).
+
+tracer(File) ->
+  {ok, Fd} = file:open(File, [write]),
+  proc_lib:spawn(fun() -> ?MODULE:tracer_loop(Fd) end).
 
 toggle_trace(PidSpec, Flags, Tracer, How) when is_atom(PidSpec);
                                                is_pid(PidSpec) ->
