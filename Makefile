@@ -1,7 +1,7 @@
 .PHONY: all
 
-all: ebin/user_default.beam
+all: ebin/my_dbg.beam
 
-ebin/user_default.beam: src/user_default.erl
-	@erlc -o ebin src/user_default.erl
+ebin/my_dbg.beam: src/my_dbg.erl
+	@erlc -o ebin src/my_dbg.erl
 

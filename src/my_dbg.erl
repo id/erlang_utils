@@ -1,4 +1,4 @@
--module(user_default).
+-module(my_dbg).
 
 -export([ export_all/1
         , pid/1
@@ -103,7 +103,7 @@ lrm() ->
   [lrm(What,M) || {What,M} <- modified_removed_modules()].
 
 nl() ->
-  [rpc:call(N,user_default,lm,[]) || N <- [node() | nodes()]].
+  [rpc:call(N,?MODULE,lm,[]) || N <- [node() | nodes()]].
 
 lrm(true,M)    -> c:l(M);
 lrm(removed,M) -> code:purge(M), code:delete(M), {removed,M}.
