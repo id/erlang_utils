@@ -1,7 +1,11 @@
 .PHONY: all
 
-all: ebin/my_dbg.beam
+ERL_SOURCES := $(wildcard src/*.erl)
+ERL_OBJECTS := $(addprefix ebin/, $(notdir $(ERL_SOURCES:%.erl=%.beam)))
 
-ebin/my_dbg.beam: src/my_dbg.erl
-	@erlc -o ebin src/my_dbg.erl
+all: $(ERL_OBJECTS)
+
+ebin/%.beam: src/%.erl
+	echo $<
+	erlc -o ebin $<
 

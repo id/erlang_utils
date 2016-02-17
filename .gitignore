@@ -1,1 +1,1 @@
-/ebin/my_dbg.beam
+/ebin/*.beam

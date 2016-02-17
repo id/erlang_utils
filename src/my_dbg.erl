@@ -196,7 +196,7 @@ ptree([_ | Pids], Acc) ->
   ptree(Pids, Acc).
 
 fmt_now() ->
-  fmt_now(erlang:now()).
+  fmt_now(erlang:timestamp()).
 
 fmt_now({_, _, Micro} = Now) ->
   {{Y,M,D}, {HH,MM,SS}} = calendar:now_to_local_time(Now),
@@ -300,9 +300,22 @@ tracer_loop(Fd) ->
       io:format(Fd, "[~s] ~p received ~180p~n",
                 [fmt_now(Now), pname(Pid), Msg]),
       ?MODULE:tracer_loop(Fd);
+    {trace_ts, Pid, spawn, Pid2, {M, F, A}, Now} ->
+      io:format(Fd, "[~s] ~p spawned ~p via ~p:~p(~p)~n",
+                [fmt_now(Now), pname(Pid), Pid2, M, F, A]),
+      ?MODULE:tracer_loop(Fd);
+    {trace_ts, Pid, link, Pid2, Now} ->
+      io:format(Fd, "[~s] ~p linked ~p~n",
+                [fmt_now(Now), pname(Pid), Pid2]),
+      ?MODULE:tracer_loop(Fd);
+    {trace_ts, Pid, exit, Reason, Now} ->
+      io:format(Fd, "[~s] ~p exited: ~p~n",
+                [fmt_now(Now), pname(Pid), Reason]),
+      ?MODULE:tracer_loop(Fd);
     {trace_ts, Pid, Tag, Msg, Now} when Tag =:= in_exiting;
                                         Tag =:= out_exiting;
-                                        Tag =:= out_exited ->
+                                        Tag =:= out_exited;
+                                        Tag =:= getting_unlinked ->
       io:format(Fd, "[~s] ~p is ~s: ~180p~n",
                 [fmt_now(Now), pname(Pid), Tag, Msg]),
       ?MODULE:tracer_loop(Fd);
