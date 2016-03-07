@@ -1,4 +1,4 @@
--module(my_dbg).
+-module(user_default).
 
 -export([ export_all/1
         , pid/1
