@@ -320,7 +320,8 @@ tracer_loop(Fd) ->
                 [fmt_now(Now), pname(Pid), Tag, Msg]),
       ?MODULE:tracer_loop(Fd);
     Msg ->
-      exit({unexpected_msg, Msg})
+      io:format(Fd, "Unexpected msg: ~180p~n",
+                [Msg])
   end.
 
 %%%_* Emacs ====================================================================
